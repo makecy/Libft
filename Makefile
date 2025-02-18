@@ -1,51 +1,50 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: mstefano <mstefano@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2023/10/05 13:14:15 by mstefano          #+#    #+#              #
-#    Updated: 2023/11/01 15:29:04 by mstefano         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-CC = cc
-
-CFLAGS = -Wall -Wextra -Werror -std=c99
-
-SRC = ft_isalpha.c ft_isdigit.c ft_isalnum.c ft_isascii.c\
-	  ft_atoi.c ft_bzero.c ft_isprint.c ft_memset.c ft_strchr.c\
-	  ft_strlen.c ft_strncmp.c ft_strnstr.c ft_strrchr.c ft_tolower.c\
-	  ft_toupper.c ft_memcpy.c ft_memmove.c ft_memchr.c ft_memcmp.c\
-	  ft_strlcat.c ft_strlcpy.c ft_strdup.c ft_calloc.c ft_putchar_fd.c\
-	  ft_putstr_fd.c ft_putendl_fd.c ft_strmapi.c ft_putnbr_fd.c\
-	  ft_striteri.c ft_substr.c ft_strjoin.c ft_strtrim.c\
-	  ft_itoa.c ft_split.c\
-	  
-BONUSSRC = ft_lstnew.c ft_lstadd_front.c ft_lstsize.c ft_lstlast.c ft_lstadd_back.c\
-		   ft_lstdelone.c ft_lstclear.c ft_lstiter.c ft_lstmap.c\
-
-BONUSOBJ = $(BONUSSRC:.c=.o)
-
-OBJ = $(SRC:.c=.o)
-
 NAME = libft.a
+CC = cc
+CFLAGS = -Wall -Wextra -Werror -std=c99 -g -I./inc
 
-all : $(NAME)
+SRCS_DIR = srcs
+BONUS_DIR = bonus
+BINDIR = bin
 
-$(NAME) : $(OBJ)
-	@ar rcs $(NAME) $(OBJ)
+SRCS = $(wildcard $(SRCS_DIR)/*.c)
+BONUS_SRCS = $(wildcard $(BONUS_DIR)/*.c)
 
-bonus : $(OBJ) $(BONUSOBJ)
-	@ar rcs $(NAME) $(OBJ) $(BONUSOBJ) 
+OBJS = $(SRCS:$(SRCS_DIR)/%.c=$(BINDIR)/%.o)
+BONUS_OBJS = $(BONUS_SRCS:$(BONUS_DIR)/%.c=$(BINDIR)/bonus/%.o)
+
+all: $(NAME)
+
+$(NAME): $(OBJS)
+	@ar rcs $(NAME) $(OBJS)
+	@echo $(GREEN)"Building $(NAME)"$(DEFAULT)
+
+bonus: $(OBJS) $(BONUS_OBJS)
+	@ar rcs $(NAME) $(OBJS) $(BONUS_OBJS)
+	@echo $(GREEN)"Building $(NAME) with bonus"$(DEFAULT)
+
+$(BINDIR):
+	@mkdir -p $(BINDIR)
+	@mkdir -p $(BINDIR)/bonus
+
+$(BINDIR)/%.o: $(SRCS_DIR)/%.c | $(BINDIR)
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(BINDIR)/bonus/%.o: $(BONUS_DIR)/%.c | $(BINDIR)
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@rm -f $(OBJ) $(BONUSOBJ)
+	@rm -rf $(BINDIR)
+	@echo $(RED)"Cleaning object files"$(DEFAULT)
 
 fclean: clean
 	@rm -f $(NAME)
+	@echo $(RED)"Cleaning $(NAME)"$(DEFAULT)
 
-re: fclean all 
+re: fclean all bonus
+	@echo $(GREEN)"Rebuilding everything"$(DEFAULT)
 
-.PHONY :clean fclean  all bonus
+.PHONY: all bonus clean fclean re
+
+DEFAULT = "\033[39m"
+GREEN = "\033[32m"
+RED = "\033[31m"
